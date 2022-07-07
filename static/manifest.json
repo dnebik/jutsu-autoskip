@@ -1,0 +1,26 @@
+{
+  "manifest_version": 2,
+  "name": "jutsu-autoskip",
+  "version": "1.0",
+
+  "content_scripts": [
+    {
+      "matches": ["https://jut.su/*"],
+      "js": ["main.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "browser_action": {
+    "browser_style": true,
+    "default_icon": {
+      "48": "/icon.png"
+    },
+    "default_title": "Jutsu Autoskip",
+    "default_popup": "popup.html"
+  },
+
+  "permissions": [
+    "storage"
+  ]
+}
