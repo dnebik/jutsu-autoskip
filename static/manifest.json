@@ -2,7 +2,12 @@
   "manifest_version": 2,
   "name": "jutsu-autoskip",
   "version": "1.0",
-
+  "author": "dnebik",
+  "description": "Plugin for auto skip intros and series on jut.su (non official)",
+  "developer": {
+    "name": "Danila Nebrenchin",
+    "url": "https://www.linkedin.com/in/dnebik/"
+  },
   "content_scripts": [
     {
       "matches": ["https://jut.su/*"],
@@ -10,7 +15,10 @@
       "run_at": "document_start"
     }
   ],
-
+  "icons": {
+    "48": "icon48.png",
+    "96": "icon96.png"
+  },
   "permissions": [
     "storage"
   ]
