@@ -2,7 +2,8 @@
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "watch": "webpack --config webpack.config.js --mode development --watch",
-    "run": "web-ext run --source-dir ./dist/"
+    "run": "web-ext run --source-dir ./dist/",
+    "build:ext": "npm run build && web-ext build --source-dir ./dist/"
   },
   "dependencies": {
     "axios": "^0.27.2",
