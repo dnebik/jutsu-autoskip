@@ -11,15 +11,6 @@
     }
   ],
 
-  "browser_action": {
-    "browser_style": true,
-    "default_icon": {
-      "48": "/icon.png"
-    },
-    "default_title": "Jutsu Autoskip",
-    "default_popup": "popup.html"
-  },
-
   "permissions": [
     "storage"
   ]
