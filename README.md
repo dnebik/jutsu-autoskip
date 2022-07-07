@@ -17,4 +17,4 @@ required `node >=16` to build
 - extension will be created in folder `web-ext-artifacts`
 
 ## Sreenshots
-![player with switchers](https://raw.githubusercontent.com/dnebik/jutsu-autoskip/screenshots/player.png)
+![player with switchers](https://github.com/dnebik/jutsu-autoskip/blob/master/screenshots/player.png?raw=true)
