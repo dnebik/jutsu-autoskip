@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { insertScript, replaceEl } from './utils';
 import {
+  markAsViewed,
   play, reset, setOverlay, setSource,
 } from './player';
 
@@ -26,6 +27,9 @@ export default function loadNextEpisode() {
       const parser = new DOMParser();
       const html = parser.parseFromString(response.data, 'text/html');
       const newVideo = html.querySelector('video');
+
+      // Mark as this episode viewed
+      await markAsViewed();
 
       // HTML data replace
       replaceEl(html, 'h1.header_video');
