@@ -1,4 +1,7 @@
 {
+  "name": "jutsu-autoskip",
+  "version": "1.3",
+  "author": "dnebik",
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "watch": "webpack --config webpack.config.js --mode development --watch",
