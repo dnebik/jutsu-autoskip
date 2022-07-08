@@ -1,31 +1,38 @@
 
 body {
-    $borderRadius: 7px;
+  $borderRadius: 7px;
 
-    --bg-color-light: #d9dfbb;
-    --bg-color-dark: #3f3f3f;
+  --bg-color-light: #d9dfbb;
+  --bg-color-dark: #3f3f3f;
+  --bg-color: var(--bg-color-dark);
+
+  &.dark_mode {
     --bg-color: var(--bg-color-dark);
+  }
 
-    &.dark_mode {
-        --bg-color: var(--bg-color-dark);
-    }
-    &:not(.dark_mode) {
-        --bg-color: var(--bg-color-light);
-    }
+  &:not(.dark_mode) {
+    --bg-color: var(--bg-color-light);
+  }
 
-    .achiv_switcher {
-        width: 100%;
-        background-color: var(--bg-color);
+  .top_player_line {
+    &.wrapped {
+      .achiv_switcher {
         display: flex;
-        justify-content: space-around;
-        border-radius: $borderRadius $borderRadius 0 0;
+      }
+    }
+    .achiv_switcher {
+      width: 100%;
+      background-color: var(--bg-color);
+      justify-content: space-around;
+      border-radius: $borderRadius $borderRadius 0 0;
     }
 
     .achiv_switcher_in {
-        background-color: unset !important;
+      background-color: unset !important;
     }
 
     .border_around_video {
-        border-radius: 0 0 $borderRadius $borderRadius !important;
+      border-radius: 0 0 $borderRadius $borderRadius !important;
     }
+  }
 }
