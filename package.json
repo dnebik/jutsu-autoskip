@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
-    "watch": "webpack --config webpack.config.js --mode development --watch",
+    "watch": "webpack --config webpack.config.js --mode production --watch",
     "watch:ext": "web-ext run --source-dir ./dist/",
     "build:ext": "npm run build && web-ext build --source-dir ./dist/",
     "dev": "concurrently \"npm run watch\" \"npm run watch:ext\""
@@ -10,8 +10,12 @@
     "node": ">=16"
   },
   "devDependencies": {
+    "@babel/parser": "^7.18.8",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-node-resolve": "^13.3.0",
     "ajv": "^8.11.0",
     "axios": "^0.27.2",
+    "base-64": "^1.0.0",
     "concurrently": "^7.2.2",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
@@ -21,11 +25,16 @@
     "file-loader": "^6.2.0",
     "html-loader": "^3.1.2",
     "json-loader": "^0.5.7",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-sass": "^1.2.12",
     "sass": "^1.53.0",
     "sass-loader": "^13.0.2",
     "style-loader": "^3.3.1",
     "web-ext": "^7.1.0",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.10.0"
+  },
+  "dependencies": {
+    "rollup": "^2.76.0"
   }
 }

@@ -1,4 +1,6 @@
 import axios from 'axios';
+// import Base64 from 'base-64';
+// import * as babel from '@babel/parser';
 import { insertScript, replaceEl } from './utils';
 import {
   markAsViewed,
@@ -43,7 +45,11 @@ export default function loadNextEpisode() {
       const htmlScripts = html.querySelectorAll('script');
       const initScriptsInner = [];
       htmlScripts.forEach((script) => {
-        if (script.innerText.search(initScriptsRegExp) > -1) { initScriptsInner.push(script.innerText); }
+        if (script.innerText.search(initScriptsRegExp) > -1) {
+          initScriptsInner.push(script.innerText.replaceAll(' ', ''));
+          // const result = babel.parse(script.innerText);
+          // console.log(result);
+        }
       });
       if (initScriptsInner) {
         await Promise.all([

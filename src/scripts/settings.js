@@ -30,8 +30,6 @@ export default {
   initSettings() {
     const topLine = document.querySelector('.top_player_line');
     if (topLine) {
-      require('../styles/settings.scss');
-
       const line = topLine.querySelector('.achiv_switcher');
       const introSwitcher = createSwitcher('Пропускать интро', 'intro_skip', autoIntroSkip);
       const seriesSwitcher = createSwitcher('Переключать серии', 'series_skip', autoSeriesSkip);
