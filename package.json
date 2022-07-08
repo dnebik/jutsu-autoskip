@@ -1,4 +1,7 @@
 {
+  "name": "jutsu-autoskip",
+  "version": "1.4",
+  "author": "dnebik",
   "scripts": {
     "build": "rollup --config rollup.config.js --environment BUILD:production",
     "watch": "rollup --config rollup.config.js --watch",
