@@ -1,6 +1,6 @@
-import observePlayer from './observePlayer';
-import { onLoaded } from './player';
-import settings from './settings';
+import observePlayer from './scripts/observePlayer';
+import { onLoaded } from './scripts/player';
+import settings from './scripts/settings';
 
 window.addEventListener('DOMContentLoaded', async () => {
   settings.initSettings();

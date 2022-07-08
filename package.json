@@ -2,8 +2,9 @@
   "scripts": {
     "build": "webpack --config webpack.config.js --mode production",
     "watch": "webpack --config webpack.config.js --mode development --watch",
-    "run": "web-ext run --source-dir ./dist/",
-    "build:ext": "npm run build && web-ext build --source-dir ./dist/"
+    "watch:ext": "web-ext run --source-dir ./dist/",
+    "build:ext": "npm run build && web-ext build --source-dir ./dist/",
+    "dev": "concurrently \"npm run watch\" \"npm run watch:ext\""
   },
   "engines": {
     "node": ">=16"
@@ -11,6 +12,7 @@
   "devDependencies": {
     "ajv": "^8.11.0",
     "axios": "^0.27.2",
+    "concurrently": "^7.2.2",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "eslint": "^8.19.0",
