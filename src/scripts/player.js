@@ -31,7 +31,7 @@ export function markAsViewed() {
   return insertScript(`
     const prev_view_file = 'previously_viewed.php';
     const cur_p_time = 0;
-    $.get(dle_root + 'engine/ajax/' + prev_view_file + '?the_login_hash=' + the_login_hash + '&pview_id=' + pview_id + '&pview_category=' + pview_category + '&pview_id_seconds=' + cur_p_time + '&mark_as_viewed=true&mark_as_restart=false, (data) => { console.log(data) }');
+    $.get(dle_root + 'engine/ajax/' + prev_view_file + '?the_login_hash=' + the_login_hash + '&pview_id=' + pview_id + '&pview_category=' + pview_category + '&pview_id_seconds=' + cur_p_time + '&mark_as_viewed=yes&mark_as_restart=yes');
   `);
 }
 
@@ -52,11 +52,14 @@ export function onLoaded() {
     observer.observe(document.body, { attributes: true });
 
     insertScript(`
+      const setMark = () => document.body.setAttribute('${dataLoaded}', 'loaded');
       (function fn() {
-        if (!player) {
+        if (!player || (!player.isReady_)) {
+          console.log('not ready');
           setTimeout(() => fn(), 50);
         } else {
-          document.body.setAttribute('${dataLoaded}', 'loaded');
+          console.log('not ready');
+          setMark();
         }
       }());
    `);

@@ -43,7 +43,9 @@ export default function loadNextEpisode() {
       const htmlScripts = html.querySelectorAll('script');
       const initScriptsInner = [];
       htmlScripts.forEach((script) => {
-        if (script.innerText.search(initScriptsRegExp) > -1) { initScriptsInner.push(script.innerText); }
+        if (script.innerText.search(initScriptsRegExp) > -1) {
+          initScriptsInner.push(script.innerText.replaceAll(' ', ''));
+        }
       });
       if (initScriptsInner) {
         await Promise.all([
