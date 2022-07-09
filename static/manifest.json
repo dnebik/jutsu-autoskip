@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "jutsu-autoskip",
-  "version": "1.5",
+  "version": "1.6",
   "author": "dnebik",
   "description": "Plugin for auto skip intros and series on jut.su (non official)",
   "developer": {
