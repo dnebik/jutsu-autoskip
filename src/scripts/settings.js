@@ -26,6 +26,12 @@ const createTopLine = (dom) => {
   dom.insertAdjacentElement('afterbegin', block);
   return block;
 };
+const createLine = (dom) => {
+  const block = document.createElement('div');
+  block.classList.add('achiv_switcher');
+  dom.insertAdjacentElement('beforeend', block);
+  return block;
+};
 
 const changeIntroSkip = (value) => {
   autoIntroSkip = value;
@@ -40,6 +46,9 @@ export default {
   get autoIntroSkip() { return autoIntroSkip; },
   get autoSeriesSkip() { return autoSeriesSkip; },
   initSettings() {
+    document
+      .querySelector('.plus_settings_def_pos')
+      ?.classList.remove('plus_settings_def_pos');
     const isIntroScipExist = document.querySelector(`.${switcherClass}--intro_skip`);
     const postMedia = document.querySelector('.post_media');
     if (!postMedia || isIntroScipExist) return;
@@ -48,7 +57,9 @@ export default {
     let topLine = document.querySelector('.top_player_line');
     if (!topLine) topLine = createTopLine(postMedia);
 
-    const line = topLine.querySelector('.achiv_switcher');
+    let line = topLine.querySelector('.achiv_switcher');
+    if (!line) line = createLine(topLine);
+
     const introSwitcher = createSwitcher('Пропускать интро', 'intro_skip', autoIntroSkip);
     const seriesSwitcher = createSwitcher('Переключать серии', 'series_skip', autoSeriesSkip);
     introSwitcher.querySelector('input').onchange = (e) => changeIntroSkip(e.target.checked);
