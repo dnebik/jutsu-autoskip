@@ -5,21 +5,16 @@ import {
   play, reset, setOverlay, setSource,
 } from './player';
 
-const match = window.location.pathname.match(/\d+\.html/)[0];
-const startEpisode = +match.replace('.html', '');
-
-let currentEpisode = startEpisode;
 const initScriptsRegExp = new RegExp(/eval/);
 
 export default function loadNextEpisode() {
   return new Promise((resolve, reject) => {
-    const hasNext = document.querySelector('.there_is_link_to_next_episode');
-    if (!hasNext) reject(new Error('this episode is last'));
+    const nextButton = document.querySelector('.there_is_link_to_next_episode');
+    if (!nextButton) reject(new Error('this episode is last'));
 
     // URL make
-    const nextEpisodePath = window.location.pathname.replace(`${currentEpisode}.html`, `${++currentEpisode}.html`);
     const url = new URL(window.location.toString());
-    url.pathname = nextEpisodePath;
+    url.pathname = nextButton.getAttribute('href');
     window.history.pushState({}, null, url.toString());
 
     // Load page with new series
