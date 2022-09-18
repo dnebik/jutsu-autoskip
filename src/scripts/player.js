@@ -1,14 +1,25 @@
+import axios from 'axios';
 import overlay from './overlay';
 import { insertScript } from './utils';
 
-const dataLoaded = 'data-player-loaded';
+const JAS_CONNECT_NAME = 'JAS_connected';
+const JAS_NO_PLAYER_NAME = 'JAS_no_player';
+const JAS_ID_IMAGE = 'jas-inserter';
+let player = null;
+let skipper = null;
+let loginHash = null;
+
+const eventInserter = () => document.body.insertAdjacentHTML('beforeend', `<img id="${JAS_ID_IMAGE}" src="x" onerror="document.dispatchEvent(window.player && window.skip_video_intro ? new CustomEvent('${JAS_CONNECT_NAME}', { detail: { player: window.player, skip: window.skip_video_intro, loginHash: window.the_login_hash } }) : new CustomEvent('${JAS_NO_PLAYER_NAME}'));">`);
 
 export function getPlayer() {
+  return player;
+}
+export function getPlayerDom() {
   return document.querySelector('div.video-js');
 }
 
 export function setSource(obj) {
-  return insertScript(`player.src(${JSON.stringify(obj)});`);
+  return player.src(JSON.stringify(obj));
 }
 
 export function setOverlay() {
@@ -16,23 +27,19 @@ export function setOverlay() {
 }
 
 export function reset() {
-  return insertScript('player.reset();');
+  return player.reset();
 }
 
 export function play() {
-  return insertScript('player.play();');
+  return player.play();
 }
 
 export function skipIntro() {
-  return insertScript('skip_video_intro();');
+  return skipper();
 }
 
-export function markAsViewed() {
-  return insertScript(`
-    const prev_view_file = 'previously_viewed.php';
-    const cur_p_time = 0;
-    $.get(dle_root + 'engine/ajax/' + prev_view_file + '?the_login_hash=' + the_login_hash + '&pview_id=' + pview_id + '&pview_category=' + pview_category + '&pview_id_seconds=' + cur_p_time + '&mark_as_viewed=yes&mark_as_restart=yes');
-  `);
+export async function markAsViewed() {
+  await axios.get(`/engine/ajax/previously_viewed.php?the_login_hash=${loginHash}&pview_id=${pview_id}&pview_category=${pview_category}&pview_id_seconds=${player.currentTime()}&mark_as_viewed=yes&mark_as_restart=yes`);
 }
 
 export function onLoaded() {
@@ -43,25 +50,28 @@ export function onLoaded() {
       return;
     }
 
-    const observer = new MutationObserver(() => {
-      if (document.body.getAttribute(dataLoaded)) {
-        observer.disconnect();
-        resolve(getPlayer());
-      }
-    });
-    observer.observe(document.body, { attributes: true });
+    const playerEventPromise = new Promise((r) => {
+      const connectHandler = (e) => {
+        document.querySelector(`#${JAS_ID_IMAGE}`)?.remove();
+        document.removeEventListener(JAS_CONNECT_NAME, connectHandler);
+        document.removeEventListener(JAS_NO_PLAYER_NAME, connectHandler);
+        r(e.detail);
+      };
+      const noConnect = () => {
+        document.querySelector(`#${JAS_ID_IMAGE}`)?.remove();
+        setTimeout(() => eventInserter(), 300);
+      };
 
-    insertScript(`
-      const setMark = () => document.body.setAttribute('${dataLoaded}', 'loaded');
-      (function fn() {
-        if (!player || (!player.isReady_)) {
-          console.log('not ready');
-          setTimeout(() => fn(), 50);
-        } else {
-          console.log('not ready');
-          setMark();
-        }
-      }());
-   `);
+      document.addEventListener(JAS_CONNECT_NAME, connectHandler);
+      document.addEventListener(JAS_NO_PLAYER_NAME, noConnect);
+    });
+
+    eventInserter();
+    playerEventPromise.then((result) => {
+      player = result.player;
+      skipper = result.skip;
+      loginHash = result.the_login_hash;
+      resolve(player);
+    });
   });
 }

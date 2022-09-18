@@ -8,6 +8,7 @@ import {
 const initScriptsRegExp = new RegExp(/eval/);
 
 export default function loadNextEpisode() {
+  console.log('next');
   return new Promise((resolve, reject) => {
     const nextButton = document.querySelector('.there_is_link_to_next_episode');
     if (!nextButton) reject(new Error('this episode is last'));
