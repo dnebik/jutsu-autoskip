@@ -1,14 +1,12 @@
 import axios from 'axios';
-import { insertScript, replaceEl } from './utils';
+import Base64 from 'base-64';
+import { findEval, parsVars, replaceEl } from './utils';
 import {
   markAsViewed,
-  play, reset, setOverlay, setSource,
+  play, reset, setOverlay, setSource, setVarsFromHtml,
 } from './player';
 
-const initScriptsRegExp = new RegExp(/eval/);
-
 export default function loadNextEpisode() {
-  console.log('next');
   return new Promise((resolve, reject) => {
     const nextButton = document.querySelector('.there_is_link_to_next_episode');
     if (!nextButton) reject(new Error('this episode is last'));
@@ -35,20 +33,7 @@ export default function loadNextEpisode() {
       replaceEl(html, 'title');
       // END HTML data replace
 
-      // Insert init scripts
-      const htmlScripts = html.querySelectorAll('script');
-      const initScriptsInner = [];
-      htmlScripts.forEach((script) => {
-        if (script.innerText.search(initScriptsRegExp) > -1) {
-          initScriptsInner.push(script.innerText.replaceAll(' ', ''));
-        }
-      });
-      if (initScriptsInner) {
-        await Promise.all([
-          initScriptsInner.map((text) => insertScript(text)),
-        ]);
-      }
-      // END Insert init scripts
+      setVarsFromHtml(html.body.innerHTML);
 
       // Player settings
       await reset();

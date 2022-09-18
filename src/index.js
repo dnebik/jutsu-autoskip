@@ -1,5 +1,5 @@
-import observePlayer from './scripts/observePlayer';
-import { getPlayerDom, onLoaded } from './scripts/player';
+// import observePlayer from './scripts/observePlayer';
+import { onLoaded } from './scripts/player';
 import settings from './scripts/settings';
 
 (async function fn() {
@@ -7,7 +7,7 @@ import settings from './scripts/settings';
     settings.initSettings();
     await onLoaded();
     // console.log(player);
-    observePlayer(getPlayerDom());
+    // observePlayer(getPlayerDom());
   } catch (e) {
     console.error(e);
   }
