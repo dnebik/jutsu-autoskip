@@ -12,8 +12,46 @@ let skipper = null;
 let loginHash = null;
 let vars = null;
 
-const eventInserter = () => document.body.insertAdjacentHTML('beforeend', `<img id="${JAS_ID_IMAGE}" src="x" onerror="document.dispatchEvent(window.player && window.skip_video_intro ? new CustomEvent('${JAS_CONNECT_NAME}', { detail: { player: window.player, skip: window.skip_video_intro, loginHash: window.the_login_hash } }) : new CustomEvent('${JAS_NO_PLAYER_NAME}'));">`);
-const parseAnimeAchievements = (string) => string.match(/{[^{]*}/gm).map(JSON.parse);
+function decodeUtf8(s) {
+  return decodeURIComponent(escape(s));
+}
+
+const eventInserter = () => document.body.insertAdjacentHTML('beforeend', `<img id="${JAS_ID_IMAGE}" src="x" onerror="document.dispatchEvent(window.player && window.skip_video_intro ? new CustomEvent('${JAS_CONNECT_NAME}', { detail: { player: window.player, prot: window.player.__proto__, skip: window.skip_video_intro, loginHash: window.the_login_hash } }) : new CustomEvent('${JAS_NO_PLAYER_NAME}'));">`);
+// const playEvent = () => document.body.insertAdjacentHTML('beforeend', '<img src="x" onerror="window.player.play">');
+// const overlayEvent = (params) => document.body.insertAdjacentHTML('beforeend', `<img src="x" onerror="() => window.player.overlay(${JSON.stringify(params).replace(/"/g, "'")})">`);
+
+const parseAnimeAchievements = (string, url) => string
+  .replace(/\r\n|\n|\r/g, '')
+  .match(/{[^{]*}/gm)
+  .map((block) => block.replace(/\{|\}/g, ''))
+  .map((block) => {
+    let str = '';
+    let i = 0;
+    let scape = false;
+    while (i < block.length) {
+      if (block[i] === '"') scape = !scape;
+      if (!(block[i] === ' ' && !scape)) str += block[i];
+      i++;
+    }
+
+    return str
+      .replace(/js_preres_url\+"/g, `"${url}`)
+      .split(',')
+      .map((prop) => {
+        const split = prop.split(/:(.*)/);
+        return `"${split[0]}":${split[1]}`;
+      })
+      .join(',');
+  })
+  .map((block) => JSON.parse(`{${block}}`));
+
+const parseAchievementsIcons = (string, url) => string
+  .replace(/ |\r\n|\n|\r/g, '')
+  .match(/this_anime_achievements_icons=\[[^\]]*]/)[0]
+  .replace('this_anime_achievements_icons=', '')
+  .replace(/\+|"|\[|\]/g, '')
+  .replace(/js_preres_url/g, url)
+  .split(',');
 
 export const getVars = () => vars;
 export const getPlayer = () => player;
@@ -21,10 +59,6 @@ export const getPlayerDom = () => document.querySelector('div.video-js');
 
 export function setSource(obj) {
   return player.src(JSON.stringify(obj));
-}
-
-export function setOverlay() {
-  // return insertScript(overlay);
 }
 
 export function reset() {
@@ -56,92 +90,103 @@ export function setVarsFromHtml(string) {
   console.log(vars);
 }
 
-function setOverlay () {
+function preloadImagesArray(images) {
+  images.map((src) => {
+    const img = new Image();
+    img.src = src;
+    return img;
+  });
+}
+
+export function setOverlay() {
   const videoOverlayArray = [];
 
   if (vars.some_achiv_str) {
-    const someAchivStr = Base64.decode(vars.some_achiv_str);
-    const animeAchievements = parseAnimeAchievements(someAchivStr);
-    // TODO продолжить тут
-    if (typeof (animeAchievements) != 'undefined' && animeAchievements.length > 0) {
-      achievement_audio = new Audio();
-      achievement_audio.src = js_preres_url + '/templates/school/images/achiv/achievement_sound_silent2.mp3';
-      achievement_audio.load();
-      document.fonts.load('16px FRQuadrata');
-      if (typeof (this_anime_achievements_icons) != 'undefined' && this_anime_achievements_icons.length > 0) preload_images_array(this_anime_achievements_icons);
-      var rindex_a;
-      for (rindex_a = 0; rindex_a < animeAchievements.length; ++rindex_a) {
-        var ach_hr = animeAchievements[rindex_a];
-        ach_hr.time_end = ach_hr.time_start + 1;
+    const someAchivStr = decodeUtf8(Base64.decode(vars.some_achiv_str));
+    const animeAchievements = parseAnimeAchievements(someAchivStr, vars.js_preres_url);
+    const animeAchievementsIcons = parseAchievementsIcons(someAchivStr, vars.js_preres_url);
+
+    if (animeAchievements.length > 0) {
+      preloadImagesArray(animeAchievementsIcons);
+      animeAchievements.forEach((achHr) => {
         videoOverlayArray.push({
-          content: '<div class="achievement_full_length achievement_main_full">\n' + '\n' + '                <div class="achievement_full_length achievement_main_base">\n' + '                    <div class="achievement_text_style">\n' + '                        <div class="achievement_text_style_top">&laquo;' + ach_hr.title + '&raquo;</div>\n' + '                        <div class="achievement_text_style_bottom">' + ach_hr.description + '</div>\n' + '                    </div>\n' + '                </div>\n' + '\n' + '                <div class="achievement_main_blink"></div>\n' + '                <div class="achievement_full_length achievement_main_glow"></div>\n' + '                <div class="achievement_badge_icon" style="background: url(\'' + ach_hr.icon + '\') no-repeat; background-size: cover;"></div>\n' + '                <div class="achievement_main_badge_frame"></div>\n' + '            </div>',
-          start: ach_hr.time_start,
-          end: ach_hr.time_end,
+          content: `
+            <div class="achievement_full_length achievement_main_full">
+              <div class="achievement_full_length achievement_main_base">
+                <div class="achievement_text_style">
+                  <div class="achievement_text_style_top">&laquo;${achHr.title}&raquo;</div>
+                  <div class="achievement_text_style_bottom">${achHr.description}</div>
+                </div>
+              </div>
+              <div class="achievement_main_blink"></div>
+              <div class="achievement_full_length achievement_main_glow"></div>
+              <div class="achievement_badge_icon" style="background: url('${achHr.icon}') no-repeat; background-size: cover;"></div>
+              <div class="achievement_main_badge_frame"></div>
+            </div>
+          `,
+          start: achHr.time_start,
+          end: achHr.time_end + 1,
           align: 'bottom',
-          class : 'vjs-overlay-nobg achievement_vjs_margin',
+          class: 'vjs-overlay-nobg achievement_vjs_margin',
           only_once: true,
           is_showed: false,
           dont_hide: true,
-          achiv_id: ach_hr.id,
-          achiv_hash: ach_hr.hash
+          achiv_id: achHr.id,
+          achiv_hash: achHr.hash,
         });
-      }
+      });
     }
   }
 
-  if (typeof (video_intro_end) != 'undefined') {
-    var video_intro_start_end = parseInt(video_intro_start) + 15;
-    if (parseInt(video_intro_start) == 0) video_intro_start = parseFloat(video_intro_start) + 0.3;
-    var video_intro_object = {
+  if (vars.video_intro_end) {
+    videoOverlayArray.push({
       content: 'Пропустить заставку',
-      start: video_intro_start,
-      end: video_intro_start_end,
+      start: Number(vars.video_intro_start) === 0 ? vars.video_intro_start + 0.3 : vars.video_intro_start,
+      end: Number(vars.video_intro_start) + 15,
       end2: 'change_video_src',
       align: 'bottom-left',
-      class : 'vjs-overlay-skip-intro',
+      class: 'vjs-overlay-skip-intro',
       the_function: 'skip_video_intro',
-      title: 'Нажмите, если лень смотреть опенинг'
-    };
-    videoOverlayArray.push(video_intro_object);
+      title: 'Нажмите, если лень смотреть опенинг',
+    });
   }
-  if (typeof (video_outro_start) != 'undefined') {
-    var video_outro_start_end = parseInt(video_outro_start) + 20;
-    if (js_isset(next_episode_link)) {
-      var video_outro_object = {
+
+  if (vars.video_outro_start && vars.next_episode_link) {
+    videoOverlayArray.push({
+      content: 'Следующая серия',
+      start: vars.video_outro_start,
+      end: Number(vars.video_outro_start) + 20,
+      end2: 'change_video_src',
+      align: 'bottom-right',
+      class: 'vjs-overlay-skip-intro',
+      the_function: 'video_go_next_episode',
+      title: 'Перейти к следующему эпизоду',
+    });
+  }
+
+  if (vars.next_episode_link && vars.this_video_duration) {
+    const videoOutroRealStart = Number(vars.this_video_duration) - 5;
+    if (videoOutroRealStart > 10 && ((vars.video_outro_start_end && videoOutroRealStart - 10 > vars.video_outro_start_end) || vars.video_outro_start_end)) {
+      videoOverlayArray.push({
         content: 'Следующая серия',
-        start: video_outro_start,
-        end: video_outro_start_end,
+        start: videoOutroRealStart,
+        end: Number(vars.this_video_duration) + 5,
         end2: 'change_video_src',
         align: 'bottom-right',
-        class : 'vjs-overlay-skip-intro',
+        class: 'vjs-overlay-skip-intro',
         the_function: 'video_go_next_episode',
-        title: 'Перейти к следующему эпизоду'
-      };
-      videoOverlayArray.push(video_outro_object);
+        title: 'Перейти к следующему эпизоду',
+      });
     }
   }
-  if (js_isset(next_episode_link) && typeof (this_video_duration) != 'undefined') {
-    var video_outro_real_start = parseInt(this_video_duration) - 5;
-    if (video_outro_real_start > 10 && ((typeof (video_outro_start_end) != 'undefined' && video_outro_real_start - 10 > video_outro_start_end) || typeof (video_outro_start_end) == 'undefined')) {
-      var video_outro_real_start_end = video_outro_real_start + 10;
-      var video_real_outro_object = {
-        content: 'Следующая серия',
-        start: video_outro_real_start,
-        end: video_outro_real_start_end,
-        end2: 'change_video_src',
-        align: 'bottom-right',
-        class : 'vjs-overlay-skip-intro',
-        the_function: 'video_go_next_episode',
-        title: 'Перейти к следующему эпизоду'
-      };
-      videoOverlayArray.push(video_real_outro_object);
-    }
-  }
+
+  // console.log(videoOverlayArray);
+
   if (videoOverlayArray.length > 0) {
     player.overlay({
       content: 'Default overlay content',
       debug: false,
-      overlays: videoOverlayArray
+      overlays: videoOverlayArray,
     });
   }
 }
@@ -172,10 +217,12 @@ export function onLoaded() {
 
     eventInserter();
     playerEventPromise.then((result) => {
+      console.log(result.skip_video_intro);
       setVarsFromHtml(document.body.innerHTML);
       player = result.player;
       skipper = result.skip;
       loginHash = result.the_login_hash;
+      setOverlay();
       resolve(player);
     });
   });
